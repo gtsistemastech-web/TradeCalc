@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resRiskPoints = document.getElementById('res-risk-points');
     const resRiskUsd = document.getElementById('res-risk-usd');
     const resRiskPct = document.getElementById('res-risk-pct');
+    const resPositionValue = document.getElementById('res-position-value');
     const targetsTableBody = document.querySelector('#targets-table tbody');
 
     // Update point value based on preset
@@ -95,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resRiskPoints.textContent = '0.00 pts';
             resRiskUsd.textContent = '$0.00';
             resRiskPct.textContent = '-%';
+            resPositionValue.textContent = '—';
             return;
         }
 
@@ -119,6 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const totalRiskUsd = riskInPointsWithSpread * pVal * effectiveSize;
+
+        // Position value (stock price × quantity) — for stocks with price filled in
+        if (isStock && sPrice > 0 && effectiveSize > 0) {
+            resPositionValue.textContent = formatCurrency(sPrice * effectiveSize);
+        } else {
+            resPositionValue.textContent = '—';
+        }
 
         // Update Summary
         resRiskPoints.textContent = riskInPointsWithSpread.toFixed(2) + ' pts';
