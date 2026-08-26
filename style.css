@@ -137,6 +137,19 @@ input[readonly] {
     cursor: default;
 }
 
+.spread-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.spread-row input[type="number"] {
+    flex: 1;
+}
+
+.spread-row select {
+    width: 45%;
+}
+
 /* Direction Toggle */
 .direction-toggle {
     display: flex;

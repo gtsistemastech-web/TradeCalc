@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const stockPrice = document.getElementById('stock-price');
     const riskPercent = document.getElementById('risk-percent');
     const suggestedSize = document.getElementById('suggested-size');
+    const spreadValue = document.getElementById('spread-value');
+    const spreadUnit = document.getElementById('spread-unit');
     const stockPriceGroup = document.getElementById('stock-price-group');
     const riskRow = document.getElementById('risk-row');
     const positionSizeUnit = document.getElementById('position-size-unit');
@@ -49,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Listen to all inputs for auto-calculation
-    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, stockPrice, riskPercent];
+    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, stockPrice, riskPercent, spreadValue];
+    spreadUnit.addEventListener('change', calculate);
     inputs.forEach(input => input.addEventListener('input', calculate));
     dirInputs.forEach(input => input.addEventListener('change', calculate));
 
@@ -67,8 +70,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const stop = parseFloat(stopPrice.value);
         const sPrice = parseFloat(stockPrice.value);
         const riskPct = parseFloat(riskPercent.value) || 0;
+        const spValue = parseFloat(spreadValue.value) || 0;
+        const spUnit = spreadUnit.value;
         const isLong = document.getElementById('dir-long').checked;
         const isStock = !stockPriceGroup.hidden;
+
+        // Convert spread to points based on the selected unit
+        let spreadPts = 0;
+        if (spValue > 0) {
+            if (spUnit === 'pts') {
+                spreadPts = spValue;
+            } else if (spUnit === 'pct') {
+                // % of the entry price → spread in points
+                spreadPts = entry * (spValue / 100);
+            } else if (spUnit === 'usd') {
+                // $ per unit → spread in points = $ value / point value (for stocks, $1/pt)
+                spreadPts = spValue / pVal;
+            }
+        }
 
         // Clear table and reset summaries if inputs are invalid
         if (isNaN(entry) || isNaN(stop) || entry === 0 || stop === 0) {
@@ -82,12 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate direction vs prices (optional warning logic could go here)
         // For calculation we just use absolute difference
         const riskInPoints = Math.abs(entry - stop);
+        const riskInPointsWithSpread = riskInPoints + spreadPts;
 
         // Suggested position size for US stocks (risk-based)
         let effectiveSize = pSize;
         if (isStock && aBal > 0 && riskPct > 0 && riskInPoints > 0 && sPrice > 0) {
             const riskAmount = aBal * (riskPct / 100);
-            const suggested = riskAmount / (riskInPoints * pVal);
+            const suggested = riskAmount / (riskInPointsWithSpread * pVal);
             suggestedSize.value = suggested.toFixed(2);
             // Auto-preenche o campo de posição com a sugestão, a menos que o usuário já tenha digitado manualmente
             if (!manualSizeOverride) {
@@ -98,10 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestedSize.value = '';
         }
 
-        const totalRiskUsd = riskInPoints * pVal * effectiveSize;
+        const totalRiskUsd = riskInPointsWithSpread * pVal * effectiveSize;
 
         // Update Summary
-        resRiskPoints.textContent = riskInPoints.toFixed(2) + ' pts';
+        resRiskPoints.textContent = riskInPointsWithSpread.toFixed(2) + ' pts';
         resRiskUsd.textContent = '-' + formatCurrency(totalRiskUsd);
         
         if (aBal > 0) {

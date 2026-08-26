@@ -110,6 +110,20 @@
                         <input type="number" id="stop-price" step="any" placeholder="0.00">
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="spread-value">Spread <span class="optional">veja no Painel Bid/Ask</span></label>
+                        <div class="spread-row">
+                            <input type="number" id="spread-value" step="0.0001" min="0" value="0" placeholder="0">
+                            <select id="spread-unit">
+                                <option value="pts" selected>Pontos</option>
+                                <option value="pct">% do preço</option>
+                                <option value="usd">$ (ação/lote)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section class="panel results-panel">
