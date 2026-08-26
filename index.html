@@ -52,23 +52,51 @@
                             <option value="10">Hong Kong (HK50) - HK$10/pt</option>
                             <option value="1">Bitcoin (BTC) - $1/pt</option>
                             <option value="10">Forex (Lote Padrão) - $10/pip</option>
-                            <option value="1">Ações (US) - $1/cent</option>
+                            <optgroup label="Ações dos EUA ($1/pt por ação)">
+                                <option value="1" data-price="230">AAPL (Apple)</option>
+                                <option value="1" data-price="430">MSFT (Microsoft)</option>
+                                <option value="1" data-price="140">NVDA (NVIDIA)</option>
+                                <option value="1" data-price="230">AMZN (Amazon)</option>
+                                <option value="1" data-price="270">TSLA (Tesla)</option>
+                                <option value="1" data-price="180">GOOGL (Alphabet)</option>
+                                <option value="1" data-price="620">META (Meta)</option>
+                                <option value="1" data-price="170">AMD (AMD)</option>
+                                <option value="1" data-price="1100">NFLX (Netflix)</option>
+                                <option value="1" data-price="72">KO (Coca-Cola)</option>
+                                <option value="1" data-price="115">DIS (Disney)</option>
+                                <option value="1" data-price="270">JPM (JPMorgan)</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="point-value">Valor do Ponto/Tick (moeda do ativo)</label>
                         <input type="number" id="point-value" step="0.01" value="20" min="0">
                     </div>
+                    <div class="form-group" id="stock-price-group" hidden>
+                        <label for="stock-price">Preço da Ação ($)</label>
+                        <input type="number" id="stock-price" step="0.01" min="0" placeholder="Ex: 230">
+                    </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="position-size">Tamanho da Posição (Lotes)</label>
+                        <label for="position-size">Tamanho da Posição <span id="position-size-unit">(Lotes)</span></label>
                         <input type="number" id="position-size" step="0.01" value="1" min="0">
                     </div>
                     <div class="form-group">
                         <label for="account-balance">Saldo da Conta ($) <span class="optional">Opcional</span></label>
                         <input type="number" id="account-balance" step="1" placeholder="Ex: 10000" min="0">
+                    </div>
+                </div>
+
+                <div class="form-row" id="risk-row" hidden>
+                    <div class="form-group">
+                        <label for="risk-percent">Risco Desejado (%) <span class="optional">para sugerir posição</span></label>
+                        <input type="number" id="risk-percent" step="0.1" value="1" min="0.1" max="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="suggested-size">Sugestão de Posição (ações)</label>
+                        <input type="number" id="suggested-size" step="0.01" min="0" readonly>
                     </div>
                 </div>
 

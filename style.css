@@ -131,6 +131,12 @@ input[type="number"]:focus, select:focus {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
+input[readonly] {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-style: dashed;
+    cursor: default;
+}
+
 /* Direction Toggle */
 .direction-toggle {
     display: flex;
