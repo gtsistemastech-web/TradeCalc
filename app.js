@@ -7,12 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const entryPrice = document.getElementById('entry-price');
     const stopPrice = document.getElementById('stop-price');
     const stockPrice = document.getElementById('stock-price');
-    const riskPercent = document.getElementById('risk-percent');
+    const riskValue = document.getElementById('risk-value');
+    const riskUnit = document.getElementById('risk-unit');
     const suggestedSize = document.getElementById('suggested-size');
+    const suggestedSizeUnit = document.getElementById('suggested-size-unit');
     const spreadValue = document.getElementById('spread-value');
     const spreadUnit = document.getElementById('spread-unit');
     const stockPriceGroup = document.getElementById('stock-price-group');
-    const riskRow = document.getElementById('risk-row');
     const positionSizeUnit = document.getElementById('position-size-unit');
     const dirInputs = document.querySelectorAll('input[name="direction"]');
     let manualSizeOverride = false;
@@ -33,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pointValue.value = v;
         }
         positionSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
+        suggestedSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
         stockPriceGroup.hidden = !isStock;
-        riskRow.hidden = !isStock;
         if (isStock && opt.dataset.price) {
             stockPrice.value = opt.dataset.price;
         } else if (!isStock) {
@@ -47,13 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // If the user manually edits the position size, stop auto-suggesting
     // (registered before calculate() listeners so the flag is set first)
+    // Clearing the field (empty) re-enables auto-suggest
     positionSize.addEventListener('input', () => {
-        manualSizeOverride = true;
+        manualSizeOverride = positionSize.value !== '';
     });
 
     // Listen to all inputs for auto-calculation
-    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, stockPrice, riskPercent, spreadValue];
+    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, stockPrice, riskValue, spreadValue];
     spreadUnit.addEventListener('change', calculate);
+    riskUnit.addEventListener('change', calculate);
     inputs.forEach(input => input.addEventListener('input', calculate));
     dirInputs.forEach(input => input.addEventListener('change', calculate));
 
@@ -70,7 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const entry = parseFloat(entryPrice.value);
         const stop = parseFloat(stopPrice.value);
         const sPrice = parseFloat(stockPrice.value);
-        const riskPct = parseFloat(riskPercent.value) || 0;
+        const rvValue = parseFloat(riskValue.value) || 0;
+        const rvUnit = riskUnit.value;
         const spValue = parseFloat(spreadValue.value) || 0;
         const spUnit = spreadUnit.value;
         const isLong = document.getElementById('dir-long').checked;
@@ -105,10 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const riskInPoints = Math.abs(entry - stop);
         const riskInPointsWithSpread = riskInPoints + spreadPts;
 
-        // Suggested position size for US stocks (risk-based)
+        // Suggested position size (risk-based) — works for all assets
         let effectiveSize = pSize;
-        if (isStock && aBal > 0 && riskPct > 0 && riskInPoints > 0 && sPrice > 0) {
-            const riskAmount = aBal * (riskPct / 100);
+        // Resolve the maximum loss in $: fixed value or % of balance
+        const riskAmount = rvUnit === 'usd' ? rvValue : (aBal > 0 ? aBal * (rvValue / 100) : 0);
+        if (riskAmount > 0 && riskInPoints > 0 && pVal > 0) {
             const suggested = riskAmount / (riskInPointsWithSpread * pVal);
             suggestedSize.value = suggested.toFixed(2);
             // Auto-preenche o campo de posição com a sugestão, a menos que o usuário já tenha digitado manualmente
@@ -116,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 positionSize.value = suggested.toFixed(2);
                 effectiveSize = suggested;
             }
-        } else if (isStock) {
+        } else {
             suggestedSize.value = '';
         }
 

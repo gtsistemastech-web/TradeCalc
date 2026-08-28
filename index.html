@@ -89,13 +89,19 @@
                     </div>
                 </div>
 
-                <div class="form-row" id="risk-row" hidden>
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="risk-percent">Risco Desejado (%) <span class="optional">para sugerir posição</span></label>
-                        <input type="number" id="risk-percent" step="0.1" value="1" min="0.1" max="5">
+                        <label for="risk-value">Perda Máxima na Operação</label>
+                        <div class="spread-row">
+                            <input type="number" id="risk-value" step="0.01" value="100" min="0">
+                            <select id="risk-unit">
+                                <option value="usd" selected>$ fixo</option>
+                                <option value="pct">% do saldo</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="suggested-size">Sugestão de Posição (ações)</label>
+                        <label for="suggested-size">Posição Sugerida <span id="suggested-size-unit">(Lotes)</span></label>
                         <input type="number" id="suggested-size" step="0.01" min="0" readonly>
                     </div>
                 </div>
