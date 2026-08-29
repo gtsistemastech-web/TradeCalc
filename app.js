@@ -6,14 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const accountBalance = document.getElementById('account-balance');
     const entryPrice = document.getElementById('entry-price');
     const stopPrice = document.getElementById('stop-price');
-    const stockPrice = document.getElementById('stock-price');
     const riskValue = document.getElementById('risk-value');
     const riskUnit = document.getElementById('risk-unit');
     const suggestedSize = document.getElementById('suggested-size');
     const suggestedSizeUnit = document.getElementById('suggested-size-unit');
     const spreadValue = document.getElementById('spread-value');
     const spreadUnit = document.getElementById('spread-unit');
-    const stockPriceGroup = document.getElementById('stock-price-group');
     const stopPerContract = document.getElementById('stop-per-contract');
     const stopPerContractRow = document.getElementById('stop-per-contract-row');
     const stopPcLabel = document.getElementById('stop-pc-label');
@@ -30,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resRiskPoints = document.getElementById('res-risk-points');
     const resRiskUsd = document.getElementById('res-risk-usd');
     const resRiskPct = document.getElementById('res-risk-pct');
-    const resPositionValue = document.getElementById('res-position-value');
     const targetsTableBody = document.querySelector('#targets-table tbody');
 
     // Update point value based on preset
@@ -44,11 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         positionSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
         suggestedSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
-        if (isStock && opt.dataset.price) {
-            stockPrice.value = opt.dataset.price;
-        } else if (!isStock) {
-            stockPrice.value = '';
-        }
         suggestedSize.value = '';
         manualSizeOverride = false;
         updateModeVisibility();
@@ -59,8 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle visibility between price-mode and stop-mode fields
     function updateModeVisibility() {
         const mode = getMode();
-        const isStock = !stockPriceGroup.hidden || !!assetPreset.selectedOptions[0].dataset.price;
-        stockPriceGroup.hidden = !isStock;
         // In stop-mode, prices/spread are hidden; in price-mode, stop field hidden
         pricesRow.hidden = (mode === 'stop');
         spreadRow.hidden = (mode === 'stop');
@@ -91,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Listen to all inputs for auto-calculation
-    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, stockPrice, riskValue, spreadValue, stopPerContract];
+    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, riskValue, spreadValue, stopPerContract];
     spreadUnit.addEventListener('change', calculate);
     riskUnit.addEventListener('change', calculate);
     inputs.forEach(input => input.addEventListener('input', calculate));
@@ -110,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const aBal = parseFloat(accountBalance.value) || 0;
         const entry = parseFloat(entryPrice.value);
         const stop = parseFloat(stopPrice.value);
-        const sPrice = parseFloat(stockPrice.value);
         const rvValue = parseFloat(riskValue.value) || 0;
         const rvUnit = riskUnit.value;
         const spValue = parseFloat(spreadValue.value) || 0;
@@ -145,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
             resRiskPoints.textContent = '0.00 pts';
             resRiskUsd.textContent = '$0.00';
             resRiskPct.textContent = '-%';
-            resPositionValue.textContent = '—';
             return;
         }
 
@@ -189,13 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             totalRiskUsd = riskInPointsWithSpread * pVal * effectiveSize;
             resRiskPoints.textContent = riskInPointsWithSpread.toFixed(2) + ' pts';
-        }
-
-        // Position value (stock price × quantity) — for stocks with price filled in
-        if (isStock && sPrice > 0 && effectiveSize > 0) {
-            resPositionValue.textContent = formatCurrency(sPrice * effectiveSize);
-        } else {
-            resPositionValue.textContent = '—';
         }
 
         // Update Summary

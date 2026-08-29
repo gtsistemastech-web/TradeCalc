@@ -85,10 +85,6 @@
                         <label for="point-value">Valor do Ponto/Tick (moeda do ativo)</label>
                         <input type="number" id="point-value" step="0.01" value="1" min="0" title="Quanto vale 1 ponto/tick na moeda do ativo. Mudou o ativo? Preenche sozinho.">
                     </div>
-                    <div class="form-group" id="stock-price-group" hidden>
-                        <label for="stock-price">Preço da Ação ($)</label>
-                        <input type="number" id="stock-price" step="0.01" min="0" placeholder="Ex: 230" title="Preço atual da ação. Usado para calcular o Valor da Posição (preço × quantidade).">
-                    </div>
                 </div>
 
                 <div class="form-row">
@@ -163,8 +159,7 @@
                 <p class="panel-hint">
                     <strong>Risco por Lote</strong> = quantos pontos você perde por lote se o stop for atingido (inclui o spread).<br>
                     <strong>Risco Financeiro Total</strong> = risco por lote × tamanho da posição → a perda máxima em dinheiro.<br>
-                    <strong>Risco da Conta</strong> = quanto essa perda representa do seu saldo (preencha o Saldo para calcular).<br>
-                    <strong>Valor da Posição</strong> = quanto fica exposto na operação (preço da ação × quantidade), para ações.
+                    <strong>Risco da Conta</strong> = quanto essa perda representa do seu saldo (preencha o Saldo para calcular).
                 </p>
                 <div class="summary-cards">
                     <div class="card risk-points" title="Quantos pontos você perde por lote se o stop for atingido (inclui o spread).">
@@ -178,10 +173,6 @@
                     <div class="card risk-pct" title="Quanto a perda máxima representa da sua conta. Precisa preencher o Saldo.">
                         <span class="label">Risco da Conta</span>
                         <span class="value" id="res-risk-pct">-%</span>
-                    </div>
-                    <div class="card position-value" title="Valor total exposto da posição (preço da ação × quantidade). Para ações com preço informado.">
-                        <span class="label">Valor da Posição</span>
-                        <span class="value" id="res-position-value">—</span>
                     </div>
                 </div>
 
