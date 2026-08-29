@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getMode = () => document.querySelector('input[name="calc-mode"]:checked').value;
 
     const resRiskPoints = document.getElementById('res-risk-points');
+    const resRiskLabel = document.getElementById('res-risk-label');
     const resRiskUsd = document.getElementById('res-risk-usd');
     const resRiskPct = document.getElementById('res-risk-pct');
     const targetsTableBody = document.querySelector('#targets-table tbody');
@@ -132,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (invalid) {
             targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">' + (isStopMode ? 'Informe a Perda Máxima na Operação.' : 'Insira os preços de Entrada e Stop para calcular.') + '</td></tr>';
             resRiskPoints.textContent = '0.00 pts';
+            resRiskLabel.textContent = isStopMode ? 'Risco do Stop' : 'Risco por Lote';
             resRiskUsd.textContent = '$0.00';
             resRiskPct.textContent = '-%';
             return;
@@ -157,9 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 suggestedSize.value = '';
             }
             totalRiskUsd = effectiveSize * riskPerLote;
-            resRiskPoints.textContent = riskPerLote > 0
-                ? stopPc.toFixed(2) + ' pts = ' + formatCurrency(riskPerLote) + ' por lote cheio (1,0)'
-                : '0.00 pts';
+            // No modo stop, o 1º card vira "Risco do Stop" = risco financeiro na posição atual
+            // (0,62 pts × 0,01 lote × US$100 = US$0,62 — bate com a plataforma)
+            resRiskLabel.textContent = 'Risco do Stop';
+            resRiskPoints.textContent = (effectiveSize > 0)
+                ? stopPc.toFixed(2) + ' pts = ' + formatCurrency(effectiveSize * riskPerLote) + ' no seu lote (' + effectiveSize + ')'
+                : stopPc.toFixed(2) + ' pts = ' + formatCurrency(riskPerLote) + ' por lote cheio (1,0)';
         } else {
             // PRICE MODE (indexes/forex/other): risk = |entry - stop| + spread, in points
             riskInPoints = Math.abs(entry - stop);
@@ -175,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 suggestedSize.value = '';
             }
             totalRiskUsd = riskInPointsWithSpread * pVal * effectiveSize;
+            resRiskLabel.textContent = 'Risco por Lote';
             resRiskPoints.textContent = riskInPointsWithSpread.toFixed(2) + ' pts';
         }
 
