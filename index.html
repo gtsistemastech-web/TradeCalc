@@ -30,10 +30,10 @@
                     <label>Direção</label>
                     <div class="direction-toggle">
                         <input type="radio" id="dir-long" name="direction" value="long" checked>
-                        <label for="dir-long" class="btn-long">Compra (Long)</label>
-                        
+                        <label for="dir-long" class="btn-long" title="Compra: você lucra se o preço subir.">Compra (Long)</label>
+
                         <input type="radio" id="dir-short" name="direction" value="short">
-                        <label for="dir-short" class="btn-short">Venda (Short)</label>
+                        <label for="dir-short" class="btn-short" title="Venda: você lucra se o preço cair.">Venda (Short)</label>
                     </div>
                 </div>
 
@@ -41,16 +41,16 @@
                     <label>Modo de Cálculo</label>
                     <div class="direction-toggle">
                         <input type="radio" id="mode-price" name="calc-mode" value="price" checked>
-                        <label for="mode-price" class="btn-long">Por Preço</label>
+                        <label for="mode-price" class="btn-long" title="Calcula usando preço de entrada, stop e spread.">Por Preço</label>
                         <input type="radio" id="mode-stop" name="calc-mode" value="stop">
-                        <label for="mode-stop" class="btn-short">Por Valor do Stop</label>
+                        <label for="mode-stop" class="btn-short" title="Calcula usando a Diferença da Cruz medida no gráfico.">Por Valor do Stop</label>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="asset-preset">Ativo</label>
-                        <select id="asset-preset">
+                        <select id="asset-preset" title="Escolha o ativo operado. Já define o valor do ponto e a moeda.">
                             <option value="custom">Personalizado</option>
                             <optgroup label="Índices BlackArrow (1 pt = moeda do ativo)">
                                 <option value="1" data-currency="US$">USATEC (Nasdaq 100) - US$1/pt</option>
@@ -83,22 +83,22 @@
                     </div>
                     <div class="form-group">
                         <label for="point-value">Valor do Ponto/Tick (moeda do ativo)</label>
-                        <input type="number" id="point-value" step="0.01" value="20" min="0">
+                        <input type="number" id="point-value" step="0.01" value="20" min="0" title="Quanto vale 1 ponto/tick na moeda do ativo. Mudou o ativo? Preenche sozinho.">
                     </div>
                     <div class="form-group" id="stock-price-group" hidden>
                         <label for="stock-price">Preço da Ação ($)</label>
-                        <input type="number" id="stock-price" step="0.01" min="0" placeholder="Ex: 230">
+                        <input type="number" id="stock-price" step="0.01" min="0" placeholder="Ex: 230" title="Preço atual da ação. Usado para calcular o Valor da Posição (preço × quantidade).">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="position-size">Tamanho da Posição <span id="position-size-unit">(Lotes)</span></label>
-                        <input type="number" id="position-size" step="0.01" value="1" min="0">
+                        <input type="number" id="position-size" step="0.01" value="1" min="0" title="Quantos lotes/ações você quer operar. Se deixar vazio, o sistema preenche com a sugestão de risco.">
                     </div>
                     <div class="form-group">
                         <label for="account-balance">Saldo da Conta ($) <span class="optional">Opcional</span></label>
-                        <input type="number" id="account-balance" step="1" placeholder="Ex: 10000" min="0">
+                        <input type="number" id="account-balance" step="1" placeholder="Ex: 10000" min="0" title="Saldo da sua conta. Necessário para usar risco em % e ver o retorno em %.">
                     </div>
                 </div>
 
@@ -106,8 +106,8 @@
                     <div class="form-group">
                         <label for="risk-value">Perda Máxima na Operação</label>
                         <div class="spread-row">
-                            <input type="number" id="risk-value" step="0.01" value="100" min="0">
-                            <select id="risk-unit">
+                            <input type="number" id="risk-value" step="0.01" value="100" min="0" title="Quanto você aceita perder nesta operação (teto do stop).">
+                            <select id="risk-unit" title="Escolha se a perda máxima é em $ fixo ou % do saldo.">
                                 <option value="usd" selected>$ fixo</option>
                                 <option value="pct">% do saldo</option>
                             </select>
@@ -115,14 +115,14 @@
                     </div>
                     <div class="form-group">
                         <label for="suggested-size">Posição Sugerida <span id="suggested-size-unit">(Lotes)</span></label>
-                        <input type="number" id="suggested-size" step="0.01" min="0" readonly>
+                        <input type="number" id="suggested-size" step="0.01" min="0" readonly title="Tamanho recomendado para respeitar a perda máxima. Só leitura — o sistema calcula.">
                     </div>
                 </div>
 
                 <div class="form-row" id="stop-per-contract-row" hidden>
                     <div class="form-group">
                         <label for="stop-per-contract" id="stop-pc-label">Diferença da Cruz (pontos) <span class="optional">meça no gráfico</span></label>
-                        <input type="number" id="stop-per-contract" step="0.01" min="0" placeholder="Ex: 50.00">
+                        <input type="number" id="stop-per-contract" step="0.01" min="0" placeholder="Ex: 50.00" title="Distância da entrada até o stop medida com a Cruz no gráfico (campo Diferença). Para ações, é o valor do stop por contrato.">
                     </div>
                     <div class="form-group">
                         <label>&nbsp;</label>
@@ -135,11 +135,11 @@
                 <div class="form-row" id="prices-row">
                     <div class="form-group">
                         <label for="entry-price">Preço de Entrada</label>
-                        <input type="number" id="entry-price" step="any" placeholder="0.00">
+                        <input type="number" id="entry-price" step="any" placeholder="0.00" title="Preço que você pretende entrar na operação.">
                     </div>
                     <div class="form-group">
                         <label for="stop-price">Preço de Stop Loss</label>
-                        <input type="number" id="stop-price" step="any" placeholder="0.00">
+                        <input type="number" id="stop-price" step="any" placeholder="0.00" title="Nível que aciona a saída com prejuízo. A distância até a entrada define seu risco.">
                     </div>
                 </div>
 
@@ -147,8 +147,8 @@
                     <div class="form-group">
                         <label for="spread-value">Spread <span class="optional">veja no Painel Bid/Ask</span></label>
                         <div class="spread-row">
-                            <input type="number" id="spread-value" step="0.0001" min="0" value="0" placeholder="0">
-                            <select id="spread-unit">
+                            <input type="number" id="spread-value" step="0.0001" min="0" value="0" placeholder="0" title="Custo de abrir a ordem (diferença entre Bid e Ask). Some pontos de risco ao stop.">
+                            <select id="spread-unit" title="Unidade do spread: em pontos, % do preço ou valor financeiro por ação/lote.">
                                 <option value="pts" selected>Pontos</option>
                                 <option value="pct">% do preço</option>
                                 <option value="usd">$ (ação/lote)</option>
@@ -161,19 +161,19 @@
             <section class="panel results-panel">
                 <h2>Resumo do Risco (1R)</h2>
                 <div class="summary-cards">
-                    <div class="card risk-points">
+                    <div class="card risk-points" title="Quantos pontos você perde por lote se o stop for atingido (inclui o spread).">
                         <span class="label">Risco por Lote</span>
                         <span class="value" id="res-risk-points">0.00 pts</span>
                     </div>
-                    <div class="card risk-usd">
+                    <div class="card risk-usd" title="Perda financeira total se o stop for atingido (risco por lote × tamanho da posição).">
                         <span class="label">Risco Financeiro Total</span>
                         <span class="value negative" id="res-risk-usd">$0.00</span>
                     </div>
-                    <div class="card risk-pct">
+                    <div class="card risk-pct" title="Quanto a perda máxima representa da sua conta. Precisa preencher o Saldo.">
                         <span class="label">Risco da Conta</span>
                         <span class="value" id="res-risk-pct">-%</span>
                     </div>
-                    <div class="card position-value">
+                    <div class="card position-value" title="Valor total exposto da posição (preço da ação × quantidade). Para ações com preço informado.">
                         <span class="label">Valor da Posição</span>
                         <span class="value" id="res-position-value">—</span>
                     </div>
@@ -184,11 +184,11 @@
                     <table id="targets-table">
                         <thead>
                             <tr>
-                                <th>Alvo</th>
-                                <th>R-Multiple</th>
-                                <th>Preço Saída</th>
-                                <th>Lucro ($)</th>
-                                <th>Retorno (%)</th>
+                                <th title="Ordem da saída parcial (1º, 2º...).">Alvo</th>
+                                <th title="Múltiplo do risco assumido. 1R = arriscou 1, 8R = ganhou 8 vezes o risco.">R-Multiple</th>
+                                <th title="Preço em que a saída parcial acontece.">Preço Saída</th>
+                                <th title="Lucro financeiro desse alvo.">Lucro ($)</th>
+                                <th title="Retorno que esse lucro representa da sua conta.">Retorno (%)</th>
                             </tr>
                         </thead>
                         <tbody>
