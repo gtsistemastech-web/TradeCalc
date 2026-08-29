@@ -16,11 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const stockPriceGroup = document.getElementById('stock-price-group');
     const stopPerContract = document.getElementById('stop-per-contract');
     const stopPerContractRow = document.getElementById('stop-per-contract-row');
+    const stopPcLabel = document.getElementById('stop-pc-label');
+    const stopPcHint = document.getElementById('stop-pc-hint');
     const pricesRow = document.getElementById('prices-row');
     const spreadRow = document.getElementById('spread-row');
     const positionSizeUnit = document.getElementById('position-size-unit');
+    const modeInputs = document.querySelectorAll('input[name="calc-mode"]');
     const dirInputs = document.querySelectorAll('input[name="direction"]');
     let manualSizeOverride = false;
+
+    const getMode = () => document.querySelector('input[name="calc-mode"]:checked').value;
 
     const resRiskPoints = document.getElementById('res-risk-points');
     const resRiskUsd = document.getElementById('res-risk-usd');
@@ -39,10 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         positionSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
         suggestedSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
-        stockPriceGroup.hidden = !isStock;
-        stopPerContractRow.hidden = !isStock;
-        pricesRow.hidden = isStock;
-        spreadRow.hidden = isStock;
         if (isStock && opt.dataset.price) {
             stockPrice.value = opt.dataset.price;
         } else if (!isStock) {
@@ -50,8 +51,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         suggestedSize.value = '';
         manualSizeOverride = false;
+        updateModeVisibility();
+        updateStopLabel();
         calculate();
     });
+
+    // Toggle visibility between price-mode and stop-mode fields
+    function updateModeVisibility() {
+        const mode = getMode();
+        const isStock = !stockPriceGroup.hidden || !!assetPreset.selectedOptions[0].dataset.price;
+        stockPriceGroup.hidden = !isStock;
+        // In stop-mode, prices/spread are hidden; in price-mode, stop field hidden
+        pricesRow.hidden = (mode === 'stop');
+        spreadRow.hidden = (mode === 'stop');
+        stopPerContractRow.hidden = (mode === 'price');
+    }
+
+    // Rotula o campo de valor do stop conforme o ativo
+    function updateStopLabel() {
+        const opt = assetPreset.selectedOptions[0];
+        const isStock = !!opt.dataset.price;
+        const v = opt.value;
+        let noun = 'Contrato';
+        let qtyNoun = 'Ações';
+        if (!isStock && v === '10') {
+            // HK50 spot → tick fracionado
+            noun = 'Ponto (tick)';
+            qtyNoun = 'Lotes';
+        } else if (!isStock) {
+            noun = 'Ponto';
+            qtyNoun = 'Lotes';
+        }
+        stopPcLabel.innerHTML = 'Valor do Stop por ' + noun + ' ($) <span class="optional">da BlackArrow</span>';
+        stopPcHint.textContent = qtyNoun + ' = Perda Máxima ÷ Valor do Stop por ' + noun;
+    }
+
+    modeInputs.forEach(input => input.addEventListener('change', () => {
+        manualSizeOverride = false;
+        updateModeVisibility();
+        calculate();
+    }));
 
     // If the user manually edits the position size, stop auto-suggesting
     // (registered before calculate() listeners so the flag is set first)
@@ -86,7 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const spUnit = spreadUnit.value;
         const stopPc = parseFloat(stopPerContract.value) || 0;
         const isLong = document.getElementById('dir-long').checked;
-        const isStock = !stockPriceGroup.hidden;
+        const mode = getMode();
+        const isStock = !!assetPreset.selectedOptions[0].dataset.price;
 
         // Convert spread to points based on the selected unit
         let spreadPts = 0;
@@ -105,10 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Resolve the maximum loss in $
         const riskAmount = rvUnit === 'usd' ? rvValue : (aBal > 0 ? aBal * (rvValue / 100) : 0);
 
-        // Clear table and reset summaries if inputs are invalid (non-stock path needs prices)
-        const invalidNonStock = !isStock && (isNaN(entry) || isNaN(stop) || entry === 0 || stop === 0);
-        if (invalidNonStock || (isStock && riskAmount <= 0)) {
-            targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">' + (isStock ? 'Informe a Perda Máxima na Operação.' : 'Insira os preços de Entrada e Stop para calcular.') + '</td></tr>';
+        const isStopMode = mode === 'stop';
+        // Clear table and reset summaries if inputs are invalid
+        const invalid = isStopMode ? riskAmount <= 0 : (isNaN(entry) || isNaN(stop) || entry === 0 || stop === 0);
+        if (invalid) {
+            targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">' + (isStopMode ? 'Informe a Perda Máxima na Operação.' : 'Insira os preços de Entrada e Stop para calcular.') + '</td></tr>';
             resRiskPoints.textContent = '0.00 pts';
             resRiskUsd.textContent = '$0.00';
             resRiskPct.textContent = '-%';
@@ -122,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let riskInPointsWithSpread = 0;
         let totalRiskUsd = 0;
 
-        if (isStock) {
-            // STOCK MODE: contracts = max loss ÷ stop per contract
+        if (isStopMode) {
+            // STOP MODE: contracts/lotes = max loss ÷ stop value
             if (stopPc > 0) {
                 const suggested = riskAmount / stopPc;
                 suggestedSize.value = suggested.toFixed(2);
@@ -135,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 suggestedSize.value = '';
             }
             totalRiskUsd = effectiveSize * stopPc;
-            resRiskPoints.textContent = stopPc > 0 ? ('$' + stopPc.toFixed(2) + '/contrato') : '0.00 pts';
+            resRiskPoints.textContent = stopPc > 0 ? ('$' + stopPc.toFixed(2) + '/lote') : '0.00 pts';
         } else {
             // PRICE MODE (indexes/forex/other): risk = |entry - stop| + spread, in points
             riskInPoints = Math.abs(entry - stop);
@@ -173,8 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Generate Targets Table (1R to 8R)
         targetsTableBody.innerHTML = '';
-        if (isStock) {
-            targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">Para ações, o foco é a posição sugerida acima.</td></tr>';
+        if (isStock || isStopMode) {
+            targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">' + (isStock ? 'Para ações, o foco é a posição sugerida acima.' : 'No modo Por Valor do Stop, informe o preço de entrada e saída para ver os alvos 1R–8R.') + '</td></tr>';
         } else {
             for (let i = 1; i <= 8; i++) {
                 const tr = document.createElement('tr');

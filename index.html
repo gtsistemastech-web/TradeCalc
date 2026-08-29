@@ -37,6 +37,16 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Modo de Cálculo</label>
+                    <div class="direction-toggle">
+                        <input type="radio" id="mode-price" name="calc-mode" value="price" checked>
+                        <label for="mode-price" class="btn-long">Por Preço</label>
+                        <input type="radio" id="mode-stop" name="calc-mode" value="stop">
+                        <label for="mode-stop" class="btn-short">Por Valor do Stop</label>
+                    </div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="asset-preset">Ativo</label>
@@ -108,13 +118,13 @@
 
                 <div class="form-row" id="stop-per-contract-row" hidden>
                     <div class="form-group">
-                        <label for="stop-per-contract">Valor do Stop por Contrato ($) <span class="optional">da BlackArrow</span></label>
+                        <label for="stop-per-contract" id="stop-pc-label">Valor do Stop por Contrato ($) <span class="optional">da BlackArrow</span></label>
                         <input type="number" id="stop-per-contract" step="0.01" min="0" placeholder="Ex: 0.50">
                     </div>
                     <div class="form-group">
                         <label>&nbsp;</label>
                         <div class="spread-row">
-                            <span class="stop-hint">Contratos = Perda Máxima ÷ Stop por Contrato</span>
+                            <span class="stop-hint" id="stop-pc-hint">Contratos = Perda Máxima ÷ Stop por Contrato</span>
                         </div>
                     </div>
                 </div>
