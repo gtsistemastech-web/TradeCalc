@@ -27,7 +27,7 @@
                 <h2>Parâmetros da Operação</h2>
                 
                 <div class="form-group">
-                    <label>Direção</label>
+                    <label>Direção <span class="req">Obrigatório</span></label>
                     <div class="direction-toggle">
                         <input type="radio" id="dir-long" name="direction" value="long" checked>
                         <label for="dir-long" class="btn-long" title="Compra: você lucra se o preço subir.">Compra (Long)</label>
@@ -38,7 +38,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Modo de Cálculo</label>
+                    <label>Modo de Cálculo <span class="req">Obrigatório</span></label>
                     <div class="direction-toggle">
                         <input type="radio" id="mode-price" name="calc-mode" value="price" checked>
                         <label for="mode-price" class="btn-long" title="Calcula usando preço de entrada, stop e spread.">Por Preço</label>
@@ -49,7 +49,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="asset-preset">Ativo</label>
+                        <label for="asset-preset">Ativo <span class="req">Obrigatório</span></label>
                         <select id="asset-preset" title="Escolha o ativo operado. Já define o valor do ponto e a moeda.">
                             <option value="custom">Personalizado</option>
                             <optgroup label="Índices BlackArrow (1 pt = moeda do ativo)">
@@ -104,7 +104,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="risk-value">Perda Máxima na Operação</label>
+                        <label for="risk-value">Perda Máxima na Operação <span class="req">Obrigatório</span></label>
                         <div class="spread-row">
                             <input type="number" id="risk-value" step="0.01" value="100" min="0" title="Quanto você aceita perder nesta operação (teto do stop).">
                             <select id="risk-unit" title="Escolha se a perda máxima é em $ fixo ou % do saldo.">
@@ -121,7 +121,7 @@
 
                 <div class="form-row" id="stop-per-contract-row" hidden>
                     <div class="form-group">
-                        <label for="stop-per-contract" id="stop-pc-label">Diferença da Cruz (pontos) <span class="optional">meça no gráfico</span></label>
+                        <label for="stop-per-contract" id="stop-pc-label">Diferença da Cruz (pontos) <span class="req">Obrigatório</span> <span class="optional">meça no gráfico</span></label>
                         <input type="number" id="stop-per-contract" step="0.01" min="0" placeholder="Ex: 50.00" title="Distância da entrada até o stop medida com a Cruz no gráfico (campo Diferença). Para ações, é o valor do stop por contrato.">
                     </div>
                     <div class="form-group">
@@ -134,11 +134,11 @@
 
                 <div class="form-row" id="prices-row">
                     <div class="form-group">
-                        <label for="entry-price">Preço de Entrada</label>
+                        <label for="entry-price">Preço de Entrada <span class="req">Obrigatório</span></label>
                         <input type="number" id="entry-price" step="any" placeholder="0.00" title="Preço que você pretende entrar na operação.">
                     </div>
                     <div class="form-group">
-                        <label for="stop-price">Preço de Stop Loss</label>
+                        <label for="stop-price">Preço de Stop Loss <span class="req">Obrigatório</span></label>
                         <input type="number" id="stop-price" step="any" placeholder="0.00" title="Nível que aciona a saída com prejuízo. A distância até a entrada define seu risco.">
                     </div>
                 </div>
@@ -160,6 +160,12 @@
 
             <section class="panel results-panel">
                 <h2>Resumo do Risco (1R)</h2>
+                <p class="panel-hint">
+                    <strong>Risco por Lote</strong> = quantos pontos você perde por lote se o stop for atingido (inclui o spread).<br>
+                    <strong>Risco Financeiro Total</strong> = risco por lote × tamanho da posição → a perda máxima em dinheiro.<br>
+                    <strong>Risco da Conta</strong> = quanto essa perda representa do seu saldo (preencha o Saldo para calcular).<br>
+                    <strong>Valor da Posição</strong> = quanto fica exposto na operação (preço da ação × quantidade), para ações.
+                </p>
                 <div class="summary-cards">
                     <div class="card risk-points" title="Quantos pontos você perde por lote se o stop for atingido (inclui o spread).">
                         <span class="label">Risco por Lote</span>

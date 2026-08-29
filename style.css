@@ -117,6 +117,33 @@ label {
     margin-left: 4px;
 }
 
+.req {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-short);
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.panel-hint {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+}
+
+.panel-hint strong {
+    color: var(--text-main);
+}
+
 input[type="number"], select {
     width: 100%;
     padding: 0.75rem 1rem;
