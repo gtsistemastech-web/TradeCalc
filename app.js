@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const cur = opt.dataset.currency || 'US$';
         const pv = parseFloat(pointValue.value) || 1;
         stopPcHint.textContent = (pv === 1)
-            ? 'Lotes = Perda ÷ Diferença  →  cada ponto vale ' + cur + '1.00'
-            : 'Lotes = Perda ÷ (Diferença × ' + cur + pv + '/pt)';
+            ? 'Lotes = Perda ÷ Diferença  →  cada ponto vale ' + cur + '1,00'
+            : 'Lotes = Perda ÷ (Diferença × ' + cur + pv + '/pt)  ·  valores por lote cheio (1,0)';
     }
 
     modeInputs.forEach(input => input.addEventListener('change', () => {
@@ -157,10 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 suggestedSize.value = '';
             }
             totalRiskUsd = effectiveSize * riskPerLote;
-            resRiskPoints.textContent = riskPerLote > 0 ? (stopPc.toFixed(2) + ' pts × $' + pVal + '/pt') : '0.00 pts';
-            if (pVal === 1) {
-                resRiskPoints.textContent = stopPc.toFixed(2) + ' pts (' + formatCurrency(stopPc) + '/lote)';
-            }
+            resRiskPoints.textContent = riskPerLote > 0
+                ? stopPc.toFixed(2) + ' pts = ' + formatCurrency(riskPerLote) + ' por lote cheio (1,0)'
+                : '0.00 pts';
         } else {
             // PRICE MODE (indexes/forex/other): risk = |entry - stop| + spread, in points
             riskInPoints = Math.abs(entry - stop);
