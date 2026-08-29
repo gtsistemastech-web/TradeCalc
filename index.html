@@ -52,29 +52,32 @@
                         <label for="asset-preset">Ativo</label>
                         <select id="asset-preset">
                             <option value="custom">Personalizado</option>
-                            <option value="20">Nasdaq (NQ) - $20/pt</option>
-                            <option value="50">S&P 500 (ES) - $50/pt</option>
-                            <option value="5">S&P 500 Micro (MES) - $5/pt</option>
-                            <option value="5">Dow Jones (YM) - $5/pt</option>
-                            <option value="25">DAX Alemanha (FDAX) - €25/pt</option>
-                            <option value="1000">Nikkei 225 (NKD) - ¥1.000/pt</option>
-                            <option value="1">UK100 (FTSE 100) - £1/pt</option>
-                            <option value="10">Hong Kong (HK50) - HK$10/pt</option>
-                            <option value="1">Bitcoin (BTC) - $1/pt</option>
-                            <option value="10">Forex (Lote Padrão) - $10/pip</option>
-                            <optgroup label="Ações dos EUA ($1/pt por ação)">
-                                <option value="1" data-price="230">AAPL (Apple)</option>
-                                <option value="1" data-price="430">MSFT (Microsoft)</option>
-                                <option value="1" data-price="140">NVDA (NVIDIA)</option>
-                                <option value="1" data-price="230">AMZN (Amazon)</option>
-                                <option value="1" data-price="270">TSLA (Tesla)</option>
-                                <option value="1" data-price="180">GOOGL (Alphabet)</option>
-                                <option value="1" data-price="620">META (Meta)</option>
-                                <option value="1" data-price="170">AMD (AMD)</option>
-                                <option value="1" data-price="1100">NFLX (Netflix)</option>
-                                <option value="1" data-price="72">KO (Coca-Cola)</option>
-                                <option value="1" data-price="115">DIS (Disney)</option>
-                                <option value="1" data-price="270">JPM (JPMorgan)</option>
+                            <optgroup label="Índices BlackArrow (1 pt = moeda do ativo)">
+                                <option value="1" data-currency="US$">USATEC (Nasdaq 100) - US$1/pt</option>
+                                <option value="1" data-currency="US$">USAIND (Dow Jones) - US$1/pt</option>
+                                <option value="1" data-currency="€">GER40 (DAX) - €1/pt</option>
+                                <option value="1" data-currency="¥">NIKKEI (Nikkei 225) - ¥1/pt</option>
+                                <option value="1" data-currency="£">UK100 (FTSE 100) - £1/pt</option>
+                                <option value="1" data-currency="HK$">HK50 (Hong Kong 50) - HK$1/pt</option>
+                            </optgroup>
+                            <optgroup label="Outros BlackArrow">
+                                <option value="1" data-currency="US$">GOLD (Ouro) - US$1/pt</option>
+                                <option value="1" data-currency="US$">BTC (Bitcoin) - US$1/pt</option>
+                                <option value="10" data-currency="US$">Forex (Lote Padrão) - US$10/pip</option>
+                            </optgroup>
+                            <optgroup label="Ações dos EUA (US$1/pt por ação)">
+                                <option value="1" data-currency="US$" data-price="230">AAPL (Apple)</option>
+                                <option value="1" data-currency="US$" data-price="430">MSFT (Microsoft)</option>
+                                <option value="1" data-currency="US$" data-price="140">NVDA (NVIDIA)</option>
+                                <option value="1" data-currency="US$" data-price="230">AMZN (Amazon)</option>
+                                <option value="1" data-currency="US$" data-price="270">TSLA (Tesla)</option>
+                                <option value="1" data-currency="US$" data-price="180">GOOGL (Alphabet)</option>
+                                <option value="1" data-currency="US$" data-price="620">META (Meta)</option>
+                                <option value="1" data-currency="US$" data-price="170">AMD (AMD)</option>
+                                <option value="1" data-currency="US$" data-price="1100">NFLX (Netflix)</option>
+                                <option value="1" data-currency="US$" data-price="72">KO (Coca-Cola)</option>
+                                <option value="1" data-currency="US$" data-price="115">DIS (Disney)</option>
+                                <option value="1" data-currency="US$" data-price="270">JPM (JPMorgan)</option>
                             </optgroup>
                         </select>
                     </div>
@@ -118,13 +121,13 @@
 
                 <div class="form-row" id="stop-per-contract-row" hidden>
                     <div class="form-group">
-                        <label for="stop-per-contract" id="stop-pc-label">Valor do Stop por Contrato ($) <span class="optional">da BlackArrow</span></label>
-                        <input type="number" id="stop-per-contract" step="0.01" min="0" placeholder="Ex: 0.50">
+                        <label for="stop-per-contract" id="stop-pc-label">Diferença da Cruz (pontos) <span class="optional">meça no gráfico</span></label>
+                        <input type="number" id="stop-per-contract" step="0.01" min="0" placeholder="Ex: 50.00">
                     </div>
                     <div class="form-group">
                         <label>&nbsp;</label>
                         <div class="spread-row">
-                            <span class="stop-hint" id="stop-pc-hint">Contratos = Perda Máxima ÷ Stop por Contrato</span>
+                            <span class="stop-hint" id="stop-pc-hint">Lotes = Perda ÷ (Diferença × Valor do Ponto)</span>
                         </div>
                     </div>
                 </div>

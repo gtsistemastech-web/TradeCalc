@@ -67,23 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
         stopPerContractRow.hidden = (mode === 'price');
     }
 
-    // Rotula o campo de valor do stop conforme o ativo
+    // Hint do campo Diferença da Cruz conforme o ativo
     function updateStopLabel() {
         const opt = assetPreset.selectedOptions[0];
-        const isStock = !!opt.dataset.price;
-        const v = opt.value;
-        let noun = 'Contrato';
-        let qtyNoun = 'Ações';
-        if (!isStock && v === '10') {
-            // HK50 spot → tick fracionado
-            noun = 'Ponto (tick)';
-            qtyNoun = 'Lotes';
-        } else if (!isStock) {
-            noun = 'Ponto';
-            qtyNoun = 'Lotes';
-        }
-        stopPcLabel.innerHTML = 'Valor do Stop por ' + noun + ' ($) <span class="optional">da BlackArrow</span>';
-        stopPcHint.textContent = qtyNoun + ' = Perda Máxima ÷ Valor do Stop por ' + noun;
+        const cur = opt.dataset.currency || 'US$';
+        const pv = pointValue.value || '1';
+        stopPcHint.textContent = 'Lotes = Perda ÷ (Diferença × ' + cur + pv + '/pt)';
     }
 
     modeInputs.forEach(input => input.addEventListener('change', () => {
@@ -164,9 +153,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalRiskUsd = 0;
 
         if (isStopMode) {
-            // STOP MODE: contracts/lotes = max loss ÷ stop value
-            if (stopPc > 0) {
-                const suggested = riskAmount / stopPc;
+            // STOP MODE: lotes = max loss ÷ (diferença da cruz × valor do ponto)
+            const riskPerLote = stopPc * pVal;
+            if (riskPerLote > 0) {
+                const suggested = riskAmount / riskPerLote;
                 suggestedSize.value = suggested.toFixed(2);
                 if (!manualSizeOverride) {
                     positionSize.value = suggested.toFixed(2);
@@ -175,8 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 suggestedSize.value = '';
             }
-            totalRiskUsd = effectiveSize * stopPc;
-            resRiskPoints.textContent = stopPc > 0 ? ('$' + stopPc.toFixed(2) + '/lote') : '0.00 pts';
+            totalRiskUsd = effectiveSize * riskPerLote;
+            resRiskPoints.textContent = riskPerLote > 0 ? (stopPc.toFixed(2) + ' pts × $' + pVal + '/pt') : '0.00 pts';
         } else {
             // PRICE MODE (indexes/forex/other): risk = |entry - stop| + spread, in points
             riskInPoints = Math.abs(entry - stop);
