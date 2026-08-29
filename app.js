@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const spreadValue = document.getElementById('spread-value');
     const spreadUnit = document.getElementById('spread-unit');
     const stockPriceGroup = document.getElementById('stock-price-group');
+    const stopPerContract = document.getElementById('stop-per-contract');
+    const stopPerContractRow = document.getElementById('stop-per-contract-row');
+    const pricesRow = document.getElementById('prices-row');
+    const spreadRow = document.getElementById('spread-row');
     const positionSizeUnit = document.getElementById('position-size-unit');
     const dirInputs = document.querySelectorAll('input[name="direction"]');
     let manualSizeOverride = false;
@@ -36,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         positionSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
         suggestedSizeUnit.textContent = '(' + (isStock ? 'Ações' : 'Lotes') + ')';
         stockPriceGroup.hidden = !isStock;
+        stopPerContractRow.hidden = !isStock;
+        pricesRow.hidden = isStock;
+        spreadRow.hidden = isStock;
         if (isStock && opt.dataset.price) {
             stockPrice.value = opt.dataset.price;
         } else if (!isStock) {
@@ -54,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Listen to all inputs for auto-calculation
-    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, stockPrice, riskValue, spreadValue];
+    const inputs = [pointValue, positionSize, accountBalance, entryPrice, stopPrice, stockPrice, riskValue, spreadValue, stopPerContract];
     spreadUnit.addEventListener('change', calculate);
     riskUnit.addEventListener('change', calculate);
     inputs.forEach(input => input.addEventListener('input', calculate));
@@ -77,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rvUnit = riskUnit.value;
         const spValue = parseFloat(spreadValue.value) || 0;
         const spUnit = spreadUnit.value;
+        const stopPc = parseFloat(stopPerContract.value) || 0;
         const isLong = document.getElementById('dir-long').checked;
         const isStock = !stockPriceGroup.hidden;
 
@@ -94,9 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Clear table and reset summaries if inputs are invalid
-        if (isNaN(entry) || isNaN(stop) || entry === 0 || stop === 0) {
-            targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">Insira os preços de Entrada e Stop para calcular.</td></tr>';
+        // Resolve the maximum loss in $
+        const riskAmount = rvUnit === 'usd' ? rvValue : (aBal > 0 ? aBal * (rvValue / 100) : 0);
+
+        // Clear table and reset summaries if inputs are invalid (non-stock path needs prices)
+        const invalidNonStock = !isStock && (isNaN(entry) || isNaN(stop) || entry === 0 || stop === 0);
+        if (invalidNonStock || (isStock && riskAmount <= 0)) {
+            targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">' + (isStock ? 'Informe a Perda Máxima na Operação.' : 'Insira os preços de Entrada e Stop para calcular.') + '</td></tr>';
             resRiskPoints.textContent = '0.00 pts';
             resRiskUsd.textContent = '$0.00';
             resRiskPct.textContent = '-%';
@@ -104,28 +116,43 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Validate direction vs prices (optional warning logic could go here)
-        // For calculation we just use absolute difference
-        const riskInPoints = Math.abs(entry - stop);
-        const riskInPointsWithSpread = riskInPoints + spreadPts;
-
-        // Suggested position size (risk-based) — works for all assets
+        // Suggested position size (risk-based)
         let effectiveSize = pSize;
-        // Resolve the maximum loss in $: fixed value or % of balance
-        const riskAmount = rvUnit === 'usd' ? rvValue : (aBal > 0 ? aBal * (rvValue / 100) : 0);
-        if (riskAmount > 0 && riskInPoints > 0 && pVal > 0) {
-            const suggested = riskAmount / (riskInPointsWithSpread * pVal);
-            suggestedSize.value = suggested.toFixed(2);
-            // Auto-preenche o campo de posição com a sugestão, a menos que o usuário já tenha digitado manualmente
-            if (!manualSizeOverride) {
-                positionSize.value = suggested.toFixed(2);
-                effectiveSize = suggested;
-            }
-        } else {
-            suggestedSize.value = '';
-        }
+        let riskInPoints = 0;
+        let riskInPointsWithSpread = 0;
+        let totalRiskUsd = 0;
 
-        const totalRiskUsd = riskInPointsWithSpread * pVal * effectiveSize;
+        if (isStock) {
+            // STOCK MODE: contracts = max loss ÷ stop per contract
+            if (stopPc > 0) {
+                const suggested = riskAmount / stopPc;
+                suggestedSize.value = suggested.toFixed(2);
+                if (!manualSizeOverride) {
+                    positionSize.value = suggested.toFixed(2);
+                    effectiveSize = suggested;
+                }
+            } else {
+                suggestedSize.value = '';
+            }
+            totalRiskUsd = effectiveSize * stopPc;
+            resRiskPoints.textContent = stopPc > 0 ? ('$' + stopPc.toFixed(2) + '/contrato') : '0.00 pts';
+        } else {
+            // PRICE MODE (indexes/forex/other): risk = |entry - stop| + spread, in points
+            riskInPoints = Math.abs(entry - stop);
+            riskInPointsWithSpread = riskInPoints + spreadPts;
+            if (riskAmount > 0 && riskInPoints > 0 && pVal > 0) {
+                const suggested = riskAmount / (riskInPointsWithSpread * pVal);
+                suggestedSize.value = suggested.toFixed(2);
+                if (!manualSizeOverride) {
+                    positionSize.value = suggested.toFixed(2);
+                    effectiveSize = suggested;
+                }
+            } else {
+                suggestedSize.value = '';
+            }
+            totalRiskUsd = riskInPointsWithSpread * pVal * effectiveSize;
+            resRiskPoints.textContent = riskInPointsWithSpread.toFixed(2) + ' pts';
+        }
 
         // Position value (stock price × quantity) — for stocks with price filled in
         if (isStock && sPrice > 0 && effectiveSize > 0) {
@@ -135,9 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update Summary
-        resRiskPoints.textContent = riskInPointsWithSpread.toFixed(2) + ' pts';
         resRiskUsd.textContent = '-' + formatCurrency(totalRiskUsd);
-        
+
         if (aBal > 0) {
             const riskPct = (totalRiskUsd / aBal) * 100;
             resRiskPct.textContent = riskPct.toFixed(2) + '%';
@@ -147,49 +173,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Generate Targets Table (1R to 8R)
         targetsTableBody.innerHTML = '';
-        
-        for (let i = 1; i <= 8; i++) {
-            const tr = document.createElement('tr');
-            
-            // Target Label
-            const tdLabel = document.createElement('td');
-            tdLabel.textContent = i + 'º Parcial';
-            
-            // R-Multiple
-            const tdRatio = document.createElement('td');
-            const spanBadge = document.createElement('span');
-            spanBadge.className = 'badge';
-            spanBadge.textContent = i + 'x1';
-            tdRatio.appendChild(spanBadge);
+        if (isStock) {
+            targetsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">Para ações, o foco é a posição sugerida acima.</td></tr>';
+        } else {
+            for (let i = 1; i <= 8; i++) {
+                const tr = document.createElement('tr');
 
-            // Target Price
-            const targetPrice = isLong ? (entry + (riskInPoints * i)) : (entry - (riskInPoints * i));
-            const tdPrice = document.createElement('td');
-            tdPrice.textContent = targetPrice.toFixed(2);
+                // Target Label
+                const tdLabel = document.createElement('td');
+                tdLabel.textContent = i + 'º Parcial';
 
-            // Gain USD
-            const gainUsd = totalRiskUsd * i;
-            const tdGainUsd = document.createElement('td');
-            tdGainUsd.textContent = '+' + formatCurrency(gainUsd);
-            tdGainUsd.className = 'gain-positive';
+                // R-Multiple
+                const tdRatio = document.createElement('td');
+                const spanBadge = document.createElement('span');
+                spanBadge.className = 'badge';
+                spanBadge.textContent = i + 'x1';
+                tdRatio.appendChild(spanBadge);
 
-            // Gain Pct
-            const tdGainPct = document.createElement('td');
-            if (aBal > 0) {
-                const gainPct = (gainUsd / aBal) * 100;
-                tdGainPct.textContent = '+' + gainPct.toFixed(2) + '%';
-                tdGainPct.className = 'gain-positive';
-            } else {
-                tdGainPct.textContent = '-';
+                // Target Price
+                const targetPrice = isLong ? (entry + (riskInPoints * i)) : (entry - (riskInPoints * i));
+                const tdPrice = document.createElement('td');
+                tdPrice.textContent = targetPrice.toFixed(2);
+
+                // Gain USD
+                const gainUsd = totalRiskUsd * i;
+                const tdGainUsd = document.createElement('td');
+                tdGainUsd.textContent = '+' + formatCurrency(gainUsd);
+                tdGainUsd.className = 'gain-positive';
+
+                // Gain Pct
+                const tdGainPct = document.createElement('td');
+                if (aBal > 0) {
+                    const gainPct = (gainUsd / aBal) * 100;
+                    tdGainPct.textContent = '+' + gainPct.toFixed(2) + '%';
+                    tdGainPct.className = 'gain-positive';
+                } else {
+                    tdGainPct.textContent = '-';
+                }
+
+                tr.appendChild(tdLabel);
+                tr.appendChild(tdRatio);
+                tr.appendChild(tdPrice);
+                tr.appendChild(tdGainUsd);
+                tr.appendChild(tdGainPct);
+
+                targetsTableBody.appendChild(tr);
             }
-
-            tr.appendChild(tdLabel);
-            tr.appendChild(tdRatio);
-            tr.appendChild(tdPrice);
-            tr.appendChild(tdGainUsd);
-            tr.appendChild(tdGainPct);
-            
-            targetsTableBody.appendChild(tr);
         }
     }
 

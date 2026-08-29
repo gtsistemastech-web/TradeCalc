@@ -150,6 +150,17 @@ input[readonly] {
     width: 45%;
 }
 
+.stop-hint {
+    display: block;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-input);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
 /* Direction Toggle */
 .direction-toggle {
     display: flex;

@@ -106,7 +106,20 @@
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row" id="stop-per-contract-row" hidden>
+                    <div class="form-group">
+                        <label for="stop-per-contract">Valor do Stop por Contrato ($) <span class="optional">da BlackArrow</span></label>
+                        <input type="number" id="stop-per-contract" step="0.01" min="0" placeholder="Ex: 0.50">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div class="spread-row">
+                            <span class="stop-hint">Contratos = Perda Máxima ÷ Stop por Contrato</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row" id="prices-row">
                     <div class="form-group">
                         <label for="entry-price">Preço de Entrada</label>
                         <input type="number" id="entry-price" step="any" placeholder="0.00">
@@ -117,7 +130,7 @@
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row" id="spread-row">
                     <div class="form-group">
                         <label for="spread-value">Spread <span class="optional">veja no Painel Bid/Ask</span></label>
                         <div class="spread-row">
